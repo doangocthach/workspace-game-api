@@ -8,7 +8,7 @@ const WorkspaceModel = require("./models/workspace.model");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const SECRET = process.env.JWT_SECRET;
-mongoose.Promise = global.Promise;
+// mongoose.Promise = global.Promise;
 
 const main = async () => {
   try {
