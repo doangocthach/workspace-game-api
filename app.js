@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const http = require("http");
@@ -6,22 +7,27 @@ const bodyParser = require("body-parser");
 const WorkspaceModel = require("./models/workspace.model");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const SECRET = "XP6j`?LXk}p>I3z";
-
+const SECRET = process.env.JWT_SECRET;
 mongoose.Promise = global.Promise;
-mongoose.connect("db:27017/workspaceManagement", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
 
 const main = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  } catch (e) {
+    console.log(e);
+  }
+
+  console.log("DB connected");
+
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
-  app.get("/", (req, res) => res.send("working.."));
+  app.get("/", (req, res) => res.send("working..."));
 
   app.get("/list", async (req, res, next) => {
-    res.status(404).send("not fould");
     const listWorkspace = await WorkspaceModel.find({}).lean();
     res.send(listWorkspace);
   });
