@@ -8,7 +8,6 @@ const WorkspaceModel = require("./models/workspace.model");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const SECRET = process.env.JWT_SECRET;
-mongoose.Promise = global.Promise;
 
 const main = async () => {
   try {
@@ -32,11 +31,12 @@ const main = async () => {
     res.send(listWorkspace);
   });
   app.post("/create", async (req, res, next) => {
-    const { username } = req.body;
-    const workspace = await WorkspaceModel.create({
-      username,
+    const { name, email } = req.body;
+    await WorkspaceModel.create({
+      name,
+      email,
     });
-    const token = jwt.sign(workspace, SECRET);
+    const token = jwt.sign(email, SECRET);
     res.send(token);
   });
   // app.listen(process.env.PORT, () => {
