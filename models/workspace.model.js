@@ -9,6 +9,13 @@ module.exports = mongoose.model(
     email: {
       type: String,
     },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
+    token: {
+      type: String,
+    },
   },
   "workspace"
 );
