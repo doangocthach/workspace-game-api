@@ -1,6 +1,6 @@
 const nodemailer = require("nodemailer");
 
-module.exports = sendMail = (receiver, token, protocol, host) => {
+module.exports = sendMail = async (receiver, token, protocol, host) => {
   let transporter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     port: 587,
@@ -11,7 +11,7 @@ module.exports = sendMail = (receiver, token, protocol, host) => {
     },
   });
   // send mail with defined transport object
-  transporter.sendMail({
+  await transporter.sendMail({
     from: "Workspace game", // sender address
     to: receiver, // list of receivers
     subject: "Workspace game active your account", // Subject line

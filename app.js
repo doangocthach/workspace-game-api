@@ -10,6 +10,7 @@ const cors = require("cors");
 const mongoose = require("mongoose");
 const SECRET = process.env.JWT_SECRET;
 const uuid = require("uuid");
+const { error } = require("console");
 
 const main = async () => {
   try {
@@ -38,18 +39,17 @@ const main = async () => {
 
     try {
       const token = uuid.v4();
-      sendMail(email, token, req.protocol, req.get("host")); // Send email
+      await sendMail(email, token, req.protocol, req.get("host")); // Send email
       await WorkspaceModel.create({
         name,
         email,
         token,
       });
+      // const token = jwt.sign(email, SECRET);
+      res.status(200).send("Create workspace successfully");
     } catch (error) {
       res.status(404).send("Something broke!");
     }
-
-    const token = jwt.sign(email, SECRET);
-    res.send(token);
   });
 
   app.get("/verify/:token", async (req, res) => {
@@ -61,8 +61,10 @@ const main = async () => {
       { _id: userToken._id },
       { isActive: true, token: null }
     );
-    res.send(userToken);
+    res.redirect(`http://localhost:5000/login`);
   });
+
+  app.post("/login", (req, res) => {});
 
   const server = http.createServer(app);
   server.listen(8080, () => {
