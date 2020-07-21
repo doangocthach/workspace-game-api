@@ -64,7 +64,13 @@ const main = async () => {
     res.redirect(`http://localhost:5000/login`);
   });
 
-  app.post("/login", (req, res) => {});
+  app.post("/login", async (req, res) => {
+    const { email, password } = req.body;
+    let user = await WorkspaceModel.findOne({ email: email });
+    if (!user) {
+      res.status(404).send("Not found");
+    }
+  });
 
   const server = http.createServer(app);
   server.listen(8080, () => {

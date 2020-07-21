@@ -16,6 +16,9 @@ module.exports = mongoose.model(
     token: {
       type: String,
     },
+    password: {
+      type: String,
+    },
   },
   "workspace"
 );
