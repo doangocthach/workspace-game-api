@@ -3,10 +3,10 @@ const mongoose = require("mongoose");
 module.exports = mongoose.model(
   "workspace",
   {
-    workspaceName: {
+    name: {
       type: String,
     },
-    emailOwner: {
+    email: {
       type: String,
     },
   },
