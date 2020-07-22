@@ -16,6 +16,6 @@ module.exports = sendMail = async (receiver, token, protocol, host) => {
     to: receiver, // list of receivers
     subject: "Workspace game active your account", // Subject line
     text: "Active your account", // plain text body
-    html: `Click here to active your account <a href="${protocol}://${host}/verify/${token}">Active</a>`, // html body
+    html: `Click here to active your account <a href="${protocol}://${host}/api/workspace/verify/${token}">Active</a>`, // html body
   });
 };

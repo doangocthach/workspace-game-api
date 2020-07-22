@@ -4,6 +4,8 @@ const uuid = require("uuid");
 const route = express.Router();
 const sendMail = require("../config/mailer");
 const escapeRegex = require("../utils/regex-escape");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 route.get("/list/:page", async (req, res, next) => {
   const pageSize = 3;
@@ -32,7 +34,10 @@ route.get("/search/:query", async (req, res, next) => {
 
 route.post("/create", async (req, res) => {
   const { name, email } = req.body;
-
+  const user = await WorkspaceModel.findOne({ email });
+  if (user) {
+    res.status(400).send("Failed! Email is already in use!");
+  }
   try {
     const token = uuid.v4();
     await WorkspaceModel.create({
@@ -49,15 +54,34 @@ route.post("/create", async (req, res) => {
 });
 
 route.get("/verify/:token", async (req, res) => {
-  let userToken = await WorkspaceModel.findOne({ token: req.params.token });
-  if (!userToken) {
-    res.status(404).send("Something broke!");
+  let user = await WorkspaceModel.findOne({ token: req.params.token });
+  if (!user) {
+    res.redirect(`http://localhost:5000`);
   }
-  await WorkspaceModel.findOneAndUpdate(
-    { _id: userToken._id },
-    { isActive: true, token: null }
-  );
-  res.redirect(`http://localhost:5000/login`);
+  res.redirect(`http://localhost:5000/login?email=${user.email}`);
 });
 
+route.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  console.log(req.body);
+  const salt = bcrypt.genSaltSync(saltRounds);
+  const hash = bcrypt.hashSync(password, salt);
+  try {
+    let workspace = await WorkspaceModel.findOne({ email: email });
+    if (!workspace) {
+      throw "Not found user";
+    } else if (!workspace.password) {
+      await WorkspaceModel.findOneAndUpdate(
+        { email: email },
+        { password: hash }
+      );
+      res.status(200).send("Create user successfully");
+    } else if (bcrypt.compareSync(password, workspace.password)) {
+      await WorkspaceModel.findOneAndUpdate({ email: email }, { token: null });
+      res.status(200).send("Login successfully");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+});
 module.exports = route;
