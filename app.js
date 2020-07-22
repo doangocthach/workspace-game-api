@@ -1,16 +1,11 @@
 require("dotenv").config();
 const express = require("express");
-const jwt = require("jsonwebtoken");
 const http = require("http");
 const app = express();
 const bodyParser = require("body-parser");
-const WorkspaceModel = require("./models/workspace.model");
-const sendMail = require("./config/mailer");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const SECRET = process.env.JWT_SECRET;
-const uuid = require("uuid");
-const { error } = require("console");
+const workspace = require("./router/workspace");
 
 const main = async () => {
   try {
@@ -28,49 +23,13 @@ const main = async () => {
   app.use(cors());
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
+  
+  const router = express.Router();
   app.get("/", (req, res) => res.send("working..."));
 
-  app.get("/list", async (req, res, next) => {
-    const listWorkspace = await WorkspaceModel.find({}).lean();
-    res.send(listWorkspace);
-  });
-  app.post("/create", async (req, res) => {
-    const { name, email } = req.body;
+  router.use("/workspace", workspace);
 
-    try {
-      const token = uuid.v4();
-      await sendMail(email, token, req.protocol, req.get("host")); // Send email
-      await WorkspaceModel.create({
-        name,
-        email,
-        token,
-      });
-      // const token = jwt.sign(email, SECRET);
-      res.status(200).send("Create workspace successfully");
-    } catch (error) {
-      res.status(404).send("Something broke!");
-    }
-  });
-
-  app.get("/verify/:token", async (req, res) => {
-    let userToken = await WorkspaceModel.findOne({ token: req.params.token });
-    if (!userToken) {
-      res.status(404).send("Something broke!");
-    }
-    await WorkspaceModel.findOneAndUpdate(
-      { _id: userToken._id },
-      { isActive: true, token: null }
-    );
-    res.redirect(`http://localhost:5000/login`);
-  });
-
-  app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
-    let user = await WorkspaceModel.findOne({ email: email });
-    if (!user) {
-      res.status(404).send("Not found");
-    }
-  });
+  app.use("/api", router);
 
   const server = http.createServer(app);
   server.listen(8080, () => {

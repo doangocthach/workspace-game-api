@@ -19,6 +19,10 @@ module.exports = mongoose.model(
     password: {
       type: String,
     },
+    createdAt: {
+      type: Number,
+      default: Date.now(),
+    },
   },
   "workspace"
 );
